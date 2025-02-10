@@ -80,11 +80,10 @@ document.getElementById('imageUpload').addEventListener('change', function(event
 
             // 🏗 新しいCanvasでマイクラ風ドット絵を作成
             const pixelSize = 8; // 8x8 のブロック単位で描画
-            const blockCanvas = document.createElement('canvas');
+            const blockCanvas = document.getElementById('blockCanvas');
             const blockCtx = blockCanvas.getContext('2d');
             blockCanvas.width = 128;
             blockCanvas.height = 128;
-            document.body.appendChild(blockCanvas);
 
             // 各ピクセルをマイクラブロックに変換
             for (let y = 0; y < 128; y += pixelSize) {
@@ -100,6 +99,9 @@ document.getElementById('imageUpload').addEventListener('change', function(event
                     blockCtx.fillRect(x, y, pixelSize, pixelSize);
                 }
             }
+
+            // プレビューCanvasを表示
+            blockCanvas.style.display = 'block';
         };
         img.src = e.target.result;
         document.getElementById('preview').src = e.target.result; // プレビュー表示

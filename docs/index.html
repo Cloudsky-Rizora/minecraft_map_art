@@ -3,10 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
+    <title>マイクラ マップアート作成</title>
+    <style>
+        #preview {
+            max-width: 300px;
+            max-height: 300px;
+            border: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello, GitHub Pages!</h1>
-    <li><a href="game_introduce.html">ゲーム詳細</a></li>
+    <h1>マップアート作成</h1>
+    <input type="file" id="imageUpload" accept="image/*">
+    <br>
+    <img id="preview" src="" alt="プレビュー画像">
+    
+    <script src="script.js"></script>
 </body>
 </html>

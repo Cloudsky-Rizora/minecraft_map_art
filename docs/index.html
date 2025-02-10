@@ -10,6 +10,11 @@
             max-height: 300px;
             border: 1px solid #ddd;
         }
+        #blockCanvas {
+            margin-top: 20px;
+            display: none; /* 最初は非表示にしておきます */
+            border: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -18,7 +23,9 @@
     <br>
     <img id="preview" src="" alt="プレビュー画像">
     <br>
-    <canvas id="canvas"></canvas> <!-- Canvasを追加 -->
+    <canvas id="canvas"></canvas> <!-- このCanvasは表示のために使う -->
+    <br>
+    <canvas id="blockCanvas"></canvas> <!-- ドット絵をプレビュー表示するCanvas -->
     
     <script src="script.js"></script>
 </body>

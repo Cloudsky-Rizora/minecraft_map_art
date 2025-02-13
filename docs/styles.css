@@ -1,0 +1,32 @@
+body {
+    /*左右に動かなくする*/
+    padding: 0;
+    font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", メイリオ, Meiryo, "ＭＳ Ｐゴシック", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: #000000;
+    text-align:center;
+}
+
+h1 {
+    text-align: left;
+}
+
+#dotCanvas {
+    position: relative;
+    top: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    image-rendering: pixelated;
+    width: 256px;
+    height: 256px;
+}
+/*背景*/
+.bg_pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #444;
+    opacity: 1;
+    z-index: -1;
+}

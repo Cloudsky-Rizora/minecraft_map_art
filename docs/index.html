@@ -1,32 +1,38 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>マイクラ マップアート作成</title>
-    <style>
-        #preview {
-            max-width: 300px;
-            max-height: 300px;
-            border: 1px solid #ddd;
-        }
-        #blockCanvas {
-            margin-top: 20px;
-            display: none; /* 最初は非表示にしておきます */
-            border: 1px solid #ddd;
-        }
-    </style>
+    <title>マップアート生成</title>
 </head>
+
 <body>
-    <h1>マップアート作成</h1>
-    <input type="file" id="imageUpload" accept="image/*">
-    <br>
-    <img id="preview" src="" alt="プレビュー画像">
-    <br>
-    <canvas id="canvas"></canvas> <!-- このCanvasは表示のために使う -->
-    <br>
-    <canvas id="blockCanvas"></canvas> <!-- ドット絵をプレビュー表示するCanvas -->
+    <header>
+        <h1>マップアート生成</h1>
+    </header>
+    
+    <main>
+        <div class="bg_pattern"></div><!--背景-->
+
+        <canvas id="canvas" width=256px height="256px"></canvas> <!-- このCanvasは表示のために使う -->
+        <br>
+        <input type="file" id="uploaded_image" accept="image/*">
+
+        <div class="container"><!--数字箱-->
+            <input type="number" id="numberInput" placeholder="1辺の長さ" step="1" value="128">
+            <br>
+            <button id="submitButton">ドットに変換</button>
+            <p id="result"></p>
+        </div>
+        <p id="test_text"></p>
+
+        <canvas id="dotCanvas"></canvas> <!-- ドット絵をプレビュー表示するCanvas -->
+        <img id="img">
+    </main>
     
     <script src="script.js"></script>
 </body>
+
 </html>

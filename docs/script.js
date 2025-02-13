@@ -1,23 +1,25 @@
-document.getElementById('imageUpload').addEventListener('change', function(event) {
+//プレビュー表示
+let img;
+document.getElementById('uploaded_image').addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function(e) {
-        const img = new Image();
+        img = new Image();
         img.onload = function() {
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
 
             // Canvasサイズを画像サイズに設定
-            canvas.width = 128;
-            canvas.height = 128;
+            canvas.width = 256;
+            canvas.height = 256;
 
-            // 画像をCanvasに描画（128x128にリサイズ）
-            ctx.drawImage(img, 0, 0, 128, 128);
+            // 画像をCanvasに描画（nxnにリサイズ）
+            ctx.drawImage(img, 0, 0, 256, 256);
 
             // ピクセル情報を取得
-            const imageData = ctx.getImageData(0, 0, 128, 128);
+            const imageData = ctx.getImageData(0, 0, 256, 256);
             console.log(imageData.data); // RGBAのピクセルデータが取得できる
         };
         img.src = e.target.result;
@@ -25,7 +27,6 @@ document.getElementById('imageUpload').addEventListener('change', function(event
     };
     reader.readAsDataURL(file);
 });
-
 // 🎨 マイクラのブロック色リスト（仮）
 const minecraftBlocks = [
     { name: "White Wool", color: [249, 255, 255] },
@@ -55,56 +56,52 @@ function findClosestMinecraftBlock(r, g, b) {
     return closestBlock;
 }
 
-// 🖼 画像アップロード処理
-document.getElementById('imageUpload').addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+//数字取得＆dot変換
+let num = 128;
+document.getElementById('submitButton').addEventListener('click', function() {
+    num = document.getElementById('numberInput').value;
+    if (num === "") {
+        document.getElementById('result').textContent = "数値を入力してください";
+        document.getElementById('result').style.color = "red";
+    }
+    else {
+        document.getElementById('test_text').textContent = num;
+    }
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-            const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d');
+    
+    const canvas = document.getElementById('dotCanvas');
+    const ctx = canvas.getContext('2d'); 
 
-            // Canvasサイズを128x128に設定
-            canvas.width = 128;
-            canvas.height = 128;
+    // Canvasサイズを256x256に設定
+    canvas.width = num;
+    canvas.height = num;
 
-            // 画像をリサイズして描画
-            ctx.drawImage(img, 0, 0, 128, 128);
+    // 画像をリサイズして描画
+    ctx.drawImage(img, 0, 0, num, num);
 
-            // ピクセル情報を取得
-            const imageData = ctx.getImageData(0, 0, 128, 128);
-            const data = imageData.data;
+    // ピクセル情報を取得
+    const imageData = ctx.getImageData(0, 0, num, num);
+    const data = imageData.data;
 
-            // 🏗 新しいCanvasでマイクラ風ドット絵を作成
-            const pixelSize = 8; // 8x8 のブロック単位で描画
-            const blockCanvas = document.getElementById('blockCanvas');
-            const blockCtx = blockCanvas.getContext('2d');
-            blockCanvas.width = 128;
-            blockCanvas.height = 128;
+    // 🏗 新しいCanvasでマイクラ風ドット絵を作成
+    const pixelSize = 1; // nxn のブロック単位で描画
+    const dotCanvas = document.getElementById('dotCanvas');
+    const dotCtx = dotCanvas.getContext('2d');
+    dotCanvas.width = num;
+    dotCanvas.height = num;
 
-            // 各ピクセルをマイクラブロックに変換
-            for (let y = 0; y < 128; y += pixelSize) {
-                for (let x = 0; x < 128; x += pixelSize) {
-                    const index = (y * 128 + x) * 4;
-                    const r = data[index];
-                    const g = data[index + 1];
-                    const b = data[index + 2];
+    // 各ピクセルをマイクラブロックに変換
+    for (let y = 0; y < num; y += pixelSize) {
+        for (let x = 0; x < num; x += pixelSize) {
+            const index = (y * num + x) * 4;
+            const r = data[index];
+            const g = data[index + 1];
+            const b = data[index + 2];
 
-                    // 最も近いマイクラブロックを探す
-                    const closestBlock = findClosestMinecraftBlock(r, g, b);
-                    blockCtx.fillStyle = `rgb(${closestBlock.color[0]}, ${closestBlock.color[1]}, ${closestBlock.color[2]})`;
-                    blockCtx.fillRect(x, y, pixelSize, pixelSize);
-                }
-            }
-
-            // プレビューCanvasを表示
-            blockCanvas.style.display = 'block';
-        };
-        img.src = e.target.result;
-        document.getElementById('preview').src = e.target.result; // プレビュー表示
+            // 最も近いマイクラブロックを探す
+            const closestBlock = findClosestMinecraftBlock(r, g, b);
+            dotCtx.fillStyle = `rgb(${closestBlock.color[0]}, ${closestBlock.color[1]}, ${closestBlock.color[2]})`;
+            dotCtx.fillRect(x, y, pixelSize, pixelSize);
+        }
     };
-    reader.readAsDataURL(file);
 });

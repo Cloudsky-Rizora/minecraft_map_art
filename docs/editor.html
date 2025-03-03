@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
+    
+    <title>ドット編集</title>
+</head>
+
+<body>
+    <header>
+        <h1>編集ページ</h1>
+    </header>
+    
+    <main>
+        <div class="bg_pattern"></div><!--背景-->
+        <canvas id="dotCanvas" width=256px, height=256px style="image-rendering: pixelated;"></canvas>
+        
+        <br>
+        <br>
+        <button id="drawButton">描画</button>
+        <button id="eraseButton">消去</button>
+        <button id="moveButton">移動</button>
+        <p>色の変更ボタン、色のテクスチャ変更</p>
+    </main>
+    <script src="editor.js"></script>
+</body>
+
+</html>

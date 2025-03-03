@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>マップアート生成(試作中)</title>
 </head>
 
@@ -21,17 +22,24 @@
         <input type="file" id="uploaded_image" accept="image/*">
 
         <div class="container"><!--数字箱-->
-            <input type="number" id="numberInput" placeholder="1辺の長さ" step="1" value="128">
-            <br>
-            <button id="submitButton">ドットに変換</button>
+            <p>画像の横幅
+            <input type="number" id="numberInput" placeholder="画像の横幅" step="1" value="128">
+            </p>
+            
+            <button id="submitButton" onclick="openPopup()">ドットに変換</button>
+            <div class="popup-overlay" id="popup" onclick="outsideClick(event)">
+                <div class="popup-content">
+                    <canvas id="dotCanvas" style="image-rendering: pixelated;"></canvas> <!-- ドット絵をプレビュー表示するCanvas -->
+                    <br>
+                    <button class="edit-btn"id="editButton" onclick="location.href='editor.html'">編集</button>
+                    <button class="close-btn" onclick="closePopup()">閉じる</button>
+                </div>
+            </div>
             <p id="result"></p>
+            <p id="test"></p>
         </div>
-        <p id="test_text"></p>
-
-        <canvas id="dotCanvas"></canvas> <!-- ドット絵をプレビュー表示するCanvas -->
-        <img id="img">
-    </main>
     
+    </main>
     <script src="script.js"></script>
 </body>
 

@@ -18,7 +18,7 @@ let mouseX = canvas.width/2,mouseY = canvas.height/2;
 //ドット絵のデータ処理＆描画
 const rawData = JSON.parse(dotRGBdata);
 const dotDataArray = new Uint8ClampedArray(rawData)
-const dotData = new ImageData(dotDataArray, img_size*16);
+const dotData = new ImageData(dotDataArray, img_size*32);
 console.log(dotData);
 //モード切替初期設定
 let mode = "move"; // 初期モード（"move", "erase", "draw"）

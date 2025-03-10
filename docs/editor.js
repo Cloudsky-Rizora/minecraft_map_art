@@ -79,9 +79,9 @@ function display() {
 
     // 新しい一時キャンバスを作成してスケールを適用
     const tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width = dotData.width;
-    tmpCanvas.height = dotData.width * aspect_rate;
     const tmpCtx = tmpCanvas.getContext("2d");
+    tmpCanvas.width = img_size;
+    tmpCanvas.height = img_size * aspect_rate;
 
     // ImageData を一時キャンバスに描画
     tmpCtx.putImageData(dotData, 0, 0);

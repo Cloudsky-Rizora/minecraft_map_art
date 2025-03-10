@@ -210,6 +210,5 @@ document.getElementById('editButton').addEventListener('click', function() {
     let dotRGBdata = ctx.getImageData(0, 0, canvas.width, canvas.height); //ドット絵のピクセルデータ
     sessionStorage.setItem("dotRGBdata", JSON.stringify(Array.from(dotRGBdata.data)));
     sessionStorage.setItem("img_width",img_size);
-    console.log(img_size);
     sessionStorage.setItem("aspect_rate",aspect_rate);
   });

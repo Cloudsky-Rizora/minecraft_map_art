@@ -2,6 +2,8 @@
 const dotRGBdata = sessionStorage.getItem('dotRGBdata');
 const img_size = sessionStorage.getItem('img_width');
 const aspect_rate = sessionStorage.getItem('aspect_rate');
+const dot_img_width = sessionStorage.getItem('dot_img_width');
+const dot_img_height = sessionStorage.getItem('dot_img_height');
 
 //キャンバスの用意
 const canvas = document.getElementById('dotCanvas')
@@ -18,7 +20,7 @@ let mouseX = canvas.width/2,mouseY = canvas.height/2;
 //ドット絵のデータ処理＆描画
 const rawData = JSON.parse(dotRGBdata);
 const dotDataArray = new Uint8ClampedArray(rawData)
-const dotData = new ImageData(dotDataArray, img_size*32);
+const dotData = new ImageData(dotDataArray,dot_img_width,dot_img_height);
 console.log(dotData);
 //モード切替初期設定
 let mode = "move"; // 初期モード（"move", "erase", "draw"）

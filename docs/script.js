@@ -211,4 +211,6 @@ document.getElementById('editButton').addEventListener('click', function() {
     sessionStorage.setItem("dotRGBdata", JSON.stringify(Array.from(dotRGBdata.data)));
     sessionStorage.setItem("img_width",img_size);
     sessionStorage.setItem("aspect_rate",aspect_rate);
+    sessionStorage.setItem("dot_img_width",tmpCanvas.width);
+    sessionStorage.setItem("dot_img_height",tmpCanvas.height);
   });

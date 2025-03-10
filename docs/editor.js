@@ -17,12 +17,8 @@ let mouseX = canvas.width/2,mouseY = canvas.height/2;
 
 //ドット絵のデータ処理＆描画
 const rawData = JSON.parse(dotRGBdata);
-if (rawData.length !== img_size * img_size * aspect_rate * 4) {
-    console.error("dotRGBdata のサイズが正しくありません。", rawData.length);
-}
 const dotDataArray = new Uint8ClampedArray(rawData)
-// const dotDataArray = new Uint8ClampedArray(JSON.parse(dotRGBdata));//RGBAの１次元配列
-const dotData = new ImageData(dotDataArray, img_size);
+const dotData = new ImageData(dotDataArray, img_size*16);
 console.log(dotData);
 //モード切替初期設定
 let mode = "move"; // 初期モード（"move", "erase", "draw"）

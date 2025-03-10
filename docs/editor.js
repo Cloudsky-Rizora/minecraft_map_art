@@ -1,8 +1,8 @@
 //ドット絵を次のページで受け取る
 const dotRGBdata = sessionStorage.getItem('dotRGBdata');
 const img_size = sessionStorage.getItem('img_width');
-console.log(img_size);
 const aspect_rate = sessionStorage.getItem('aspect_rate');
+console.log(dotRGBdata,img_size,aspect_rate);
 //キャンバスの用意
 const canvas = document.getElementById('dotCanvas')
 const ctx = canvas.getContext("2d");

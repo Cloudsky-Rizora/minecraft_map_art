@@ -17,7 +17,7 @@
     <main>
         <div class="bg_pattern"></div><!--背景-->
 
-        <canvas id="canvas" width=256px height="256px"></canvas> <!-- このCanvasは表示のために使う -->
+        <canvas id="canvas" width=256px height="256px"></canvas> <!-- このCanvasは提出画像表示のために使う -->
         <br>
         <input type="file" id="uploaded_image" accept="image/*">
 
@@ -31,7 +31,7 @@
                 <div class="popup-content">
                     <canvas id="dotCanvas" style="image-rendering: pixelated;"></canvas> <!-- ドット絵をプレビュー表示するCanvas -->
                     <br>
-                    <button class="edit-btn"id="editButton" onclick="location.href='editor.html'">編集</button>
+                    <button class="edit-btn"id="editButton">編集</button>
                     <button class="close-btn" onclick="closePopup()">閉じる</button>
                 </div>
             </div>

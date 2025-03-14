@@ -1,33 +1,157 @@
 //ドット絵を次のページで受け取る
-const dotRGBdata = sessionStorage.getItem('dotRGBdata');
-const img_size = sessionStorage.getItem('img_width');
+const pixel_data = sessionStorage.getItem('pixel_data').split(',').map(Number); //RGBAのただの配列
+const img_width = sessionStorage.getItem('img_width');
 const aspect_rate = sessionStorage.getItem('aspect_rate');
-const dot_img_width = sessionStorage.getItem('dot_img_width');
-const dot_img_height = sessionStorage.getItem('dot_img_height');
+
+//マイクラのブロックの用意
+const minecraftBlocks = [
+    { name: "black_concrete.png", color: [8,10,15] },
+    { name: "blue_concrete.png", color: [44,46,142] },
+    { name: "brown_concrete.png", color: [94,55,25] },
+    { name: "cyan_concrete.png", color: [21,118,134] },
+    { name: "gray_concrete.png", color: [54,57,61] },
+    { name: "green_concrete.png", color: [72,90,36] },
+    { name: "light_blue_concrete.png", color: [32,137,199] },
+    { name: "light_gray_concrete.png", color: [126,126,116] },
+    { name: "lime_concrete.png", color: [92,166,24] },
+    { name: "magenta_concrete.png", color: [168,43,158] },
+    { name: "orange_concrete.png", color: [222,98,2] },
+    { name: "pink_concrete.png", color: [209,99,139] },
+    { name: "purple_concrete.png", color: [100,32,155] },
+    { name: "red_concrete.png", color: [141,33,33] },
+    { name: "white_concrete.png", color: [205,210,211] },
+    { name: "yellow_concrete.png", color: [239,176,13] },
+
+
+    { name: "black_wool.png", color: [12,14,18] },
+    { name: "blue_wool.png", color: [47,50,148] },
+    { name: "brown_wool.png", color: [103,64,35] },
+    { name: "cyan_wool.png", color: [21,126,139] },
+    { name: "gray_wool.png", color: [51,61,65] },
+    { name: "green_wool.png", color: [77,99,32] },
+    { name: "light_blue_wool.png", color: [44,155,207] },
+    { name: "light_gray_wool.png", color: [132,132,123] },
+    { name: "lime_wool.png", color: [101,175,24] },
+    { name: "magenta_wool.png", color: [177,56,167] },
+    { name: "orange_wool.png", color: [232,104,7] },
+    { name: "pink_wool.png", color: [229,117,155] },
+    { name: "purple_wool.png", color: [108,35,162] },
+    { name: "red_wool.png", color: [149,34,33] },
+    { name: "white_wool.png", color: [218,223,224] },
+    { name: "yellow_wool.png", color: [245,185,28] },
+    
+    
+    { name: "bookshelf.png", color: [999,999,999] },
+];
+
+//関数の用意
+//最も近い色のマイクラブロックを探す関数
+function findClosestMinecraftBlock(r, g, b) {
+    let closestBlock = { name: "bookshelf.png", color: [0,0,0] };
+    let minDistance = Infinity;
+
+    minecraftBlocks.forEach(block => {
+        const [br, bg, bb] = block.color;
+        const distance = Math.sqrt((r - br) ** 2 + (g - bg) ** 2 + (b - bb) ** 2);
+
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestBlock = block;
+        }
+    });
+
+    return closestBlock;
+}
+
+//画像のpixeldata(rgba)を取得する関数
+function get_pixel_data(img_width,aspect_rate){
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Canvasサイズを設定
+    canvas.width = img_width;
+    canvas.height = img_width*aspect_rate;
+
+    // 画像をリサイズして描画
+    ctx.drawImage(img, 0, 0, img_width, img_width*aspect_rate);
+
+    // ピクセル情報を取得
+    const imageData = ctx.getImageData(0, 0, img_width, img_width*aspect_rate); //元の画像のRGB
+    const data = imageData.data;
+    return data;
+};
+
+//すべての画像を事前ロードする関数
+function preloadImages(blockList,blockImages) {
+    return Promise.all(blockList.map(block => {
+        return new Promise(resolve => {
+            let img = new Image();
+            img.src = `./block_img/${block.name}`;
+            img.onload = () => {
+                blockImages[block.name] = img;
+                resolve();
+            };
+        });
+    }));
+};
 
 //キャンバスの用意
 const canvas = document.getElementById('dotCanvas')
 const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
+const tmpCanvas = document.createElement('canvas');
+const tmpCtx = tmpCanvas.getContext("2d");
+
+tmpCanvas.width = img_width*16;
+tmpCanvas.height = Math.round(img_width*aspect_rate)*16;
+
+const blockImages = {}; // 画像キャッシュ用オブジェクト
+const blockList = minecraftBlocks; // すべてのマイクラブロックのリストを取得
+
+//コマンド生成のためのblocknameが入ったリスト生成
+let block_name_list = [];
+
+//画像をプリロードし、完了後に描画を開始
+preloadImages(blockList,blockImages).then(() => {
+    renderCanvas(); // 画像がロードされた後に描画
+});
+
+//tmpcanvasにブロックでドット化した画像を写す
+const blockSize = 16;
+function renderCanvas() {
+    for (let y = 0; y < Math.round(img_width*aspect_rate); y++) {
+        for (let x = 0; x < img_width; x++) {
+            const index = (y * img_width + x) * 3;
+            const r = pixel_data[index];
+            const g = pixel_data[index + 1];
+            const b = pixel_data[index + 2];
+
+            const closestBlock = findClosestMinecraftBlock(r, g, b); // 近い色のブロックを取得
+            const img2 = blockImages[closestBlock.name]; // キャッシュから画像を取得
+            if (img2) {
+                tmpCtx.drawImage(img2, x * blockSize, y * blockSize, blockSize, blockSize);
+                block_name_list.splice(y * img_width + x,0,closestBlock.name);
+            }
+        }
+    }
+    display();
+};
+console.log(block_name_list);
 
 //ドット絵関係の初期設定
-let scale = 1;//拡大縮小要素
+let scale = 512/tmpCanvas.width;//拡大縮小要素
 const scaleFactor = 1.1;//拡大縮小要素
-const minscale = 0.1, maxscale = 40;
+const minscale = 0.03, maxscale = 10;
 let imgX = 0, imgY = 0; //画像のオフセット
 let mouseX = canvas.width/2,mouseY = canvas.height/2;
 
 //ドット絵のデータ処理＆描画
-const rawData = JSON.parse(dotRGBdata);
-const dotDataArray = new Uint8ClampedArray(rawData);
-console.log(dot_img_width,dot_img_height);
-const dotData = new ImageData(dotDataArray,dot_img_width);
-console.log(dotData);
+
 //モード切替初期設定
 let mode = "move"; // 初期モード（"move", "erase", "draw"）
 let isDragging = false;
 let lastX, lastY;
-let pixelSize = 10; // ピクセルサイズ（加筆・消去時）
+let pixelSize = 16; // ピクセルサイズ（加筆・消去時）
 
 // ボタン押下でmodeの切り替え
 document.getElementById("drawButton").addEventListener("click", () => mode = "draw");
@@ -47,6 +171,14 @@ canvas.addEventListener("mousemove", (event) => {
 		dragImage(event);
 	} else if ((mode === "erase" || mode === "draw") && event.buttons === 1) {
 		drawOrErase(event);
+	}
+});
+
+canvas.addEventListener("click", (event) => {
+	if (mode === "move" && isDragging) {
+		dragImage(event);
+	} else if (mode === "erase" || mode === "draw") {
+        drawOrErase(event);
 	}
 });
 
@@ -72,7 +204,6 @@ function dragImage(event) {
 }
 
 //ディスプレイ関数 //画像を大きくするとはみ出る為、スケールの調整が必要
-display();
 function display() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -81,45 +212,34 @@ function display() {
     ctx.translate(imgX, imgY);
     ctx.scale(scale, scale);
 
-    // 新しい一時キャンバスを作成してスケールを適用
-    const tmpCanvas = document.createElement('canvas');
-    const tmpCtx = tmpCanvas.getContext("2d");
-    tmpCanvas.width = img_size;
-    tmpCanvas.height = img_size * aspect_rate;
-
-    // ImageData を一時キャンバスに描画
-    tmpCtx.putImageData(dotData, 0, 0);
-
     // 一時キャンバスをメインキャンバスに描画（スケール・トランスレート適用）
-    ctx.drawImage(tmpCanvas, (canvas.width - tmpCanvas.width) / 2, (canvas.height - tmpCanvas.height) / 2, tmpCanvas.width, tmpCanvas.height);
+    ctx.drawImage(tmpCanvas, 0,0, tmpCanvas.width, tmpCanvas.height);
     ctx.restore();
 }
 
-// クリックイベントリスナーを追加
+// クリックした時の座標をconsole.log
 canvas.addEventListener("click", function(event) {
 	//根幹
-    console.log(Math.floor((event.offsetX-imgX)/scale),Math.floor((event.offsetY-imgY)/scale));
-    //根幹(小数点あり)
-    console.log(((event.offsetX-imgX)/scale),((event.offsetY-imgY)/scale));
-    //event.offsetの小数点部分
-    console.log(event.offsetX/scale-Math.floor(event.offsetX/scale),event.offsetY/scale-Math.floor(event.offsetY/scale));
-    //imgXの小数点部分
-    console.log((imgX-Math.floor(imgX))/scale,(imgY-Math.floor(imgY))/scale);
-    
+    console.log(Math.floor((event.offsetX-imgX)/scale/16),Math.floor((event.offsetY-imgY)/scale/16));
+    //console.log()
 });
 
 
 // ピクセル加筆・消去処理（draw / erase モード用）
 function drawOrErase(event) {
-  const x = Math.floor(event.offsetX / pixelSize) * pixelSize;
-  const y = Math.floor(event.offsetY / pixelSize) * pixelSize;
-  
-  if (mode === "erase") {
-      ctx.clearRect(x, y, pixelSize, pixelSize); // ピクセル削除
-  } else if (mode === "draw") {
-      ctx.fillStyle = "black"; // 描画色
-      ctx.fillRect(x, y, pixelSize, pixelSize);
-  }
+    const x = Math.floor((event.offsetX-imgX)/scale/16);
+    const y = Math.floor((event.offsetY-imgY)/scale/16);
+
+    if (mode === "erase") {
+        //airの画像をクリックした座標に置く(tmpctxの書き換え)(保存も)
+
+    } 
+    else if (mode === "draw") {
+        //選択しているブロックの画像をくりっくした座標に置く(tmpctxの置き換え)
+        img2 = blockImages[block_name];
+        tmpCtx.drawImage(img2, x * blockSize, y * blockSize, blockSize, blockSize);
+        display();
+    }
 }
 
 // 拡大縮小
@@ -146,9 +266,6 @@ canvas.addEventListener("wheel", function(event) {
     // 上限・下限を適用
     newscale = Math.min(Math.max(newscale, minscale), maxscale);
 
-    // スケールの変化量を計算
-    const scaleChange = newscale / scale;  // 拡大率の変化
-
     // スケール後のマウス位置を取得（画像座標系）
     const afterX = (mouseCanvasX - imgX) / newscale;
     const afterY = (mouseCanvasY - imgY) / newscale;
@@ -159,14 +276,13 @@ canvas.addEventListener("wheel", function(event) {
 
     // 更新したスケールを適用
     scale = newscale;
-
     display(); // 再描画
 });
 
 // 画像の移動範囲を制限する関数 //使ってない
 function limitImagePosition() {
-  const imgWidth = img_size * scale;
-  const imgHeight = img_size * scale;
+  const imgWidth = img_width * scale;
+  const imgHeight = img_width * scale;
   
   const minX = -canvas.width / 2 - imgWidth / 2;
   const maxX = canvas.width / 2 + imgWidth / 2;
@@ -178,15 +294,13 @@ function limitImagePosition() {
   imgY = Math.max(minY, Math.min(maxY, imgY));
 }
 
-// 指定した座標 (x, y) にピクセルを書き込む関数
-let width = 256;
-let height = 256;
-function setPixel(x, y, r, g, b, a) {
-    if (x < 0 || x >= width || y < 0 || y >= height) return; // 範囲外なら無視
-    console.log(x,y)
-    const index = (y * width + x) * 4; // RGBA の 1D 配列のインデックス
-    dotDataArray.data[index] = r;     // 赤
-    dotDataArray.data[index + 1] = g; // 緑
-    dotDataArray.data[index + 2] = b; // 青
-    dotDataArray.data[index + 3] = a; // アルファ（透明度）
-}
+//ブロックボタンを押したときに押されたブロックを反映する関数
+document.querySelectorAll(".block_image").forEach(image => {
+    image.addEventListener("click", function() {
+        block_name = this.getAttribute("src").slice(10);
+        console.log(block_name);
+    });
+});
+
+
+//どの座標にどのブロックが置かれているか記録する配列が必要。

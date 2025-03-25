@@ -60,4 +60,14 @@ canvas {
     cursor: pointer;
 }
 
+.glowing-image {
+    width: 24px;
+    height: 24px;
+    transition: box-shadow 1s ease-in-out;
+}
+
+/* 光るエフェクト */
+.glow {
+    box-shadow: 0 0 5px 5px rgba(0, 255, 63, 0.8);
+}
 /*以降editorのcss*/

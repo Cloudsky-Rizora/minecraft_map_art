@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
     
     <title>ドット編集</title>
@@ -21,28 +21,53 @@
         <canvas id="dotCanvas" width=512px, height=512px style="image-rendering: pixelated;"></canvas>
         <br>
         <br>
-        <div>
-            <img src="block_img/black_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/blue_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/brown_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/cyan_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/gray_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/green_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/light_blue_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/light_gray_wool.png" class="block_image" img_src = height="24px" width="24px" />                    
-            <img src="block_img/lime_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/magenta_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/orange_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/pink_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/purple_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/red_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/white_wool.png" class="block_image" img_src = height="24px" width="24px" />
-            <img src="block_img/yellow_wool.png" class="block_image" img_src = height="24px" width="24px" />
+        <div class="wool">
+            <img src="block_img/black_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/blue_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/brown_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/cyan_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/gray_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/green_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/light_blue_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/light_gray_wool.png" class="block_image" height="24px" width="24px" />                    
+            <img src="block_img/lime_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/magenta_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/orange_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/pink_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/purple_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/red_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/white_wool.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/yellow_wool.png" class="block_image" height="24px" width="24px" />
         </div>
+        <div class="concrete">
+            <img src="block_img/black_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/blue_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/brown_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/cyan_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/gray_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/green_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/light_blue_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/light_gray_concrete.png" class="block_image" height="24px" width="24px" />                    
+            <img src="block_img/lime_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/magenta_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/orange_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/pink_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/purple_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/red_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/white_concrete.png" class="block_image" height="24px" width="24px" />
+            <img src="block_img/yellow_concrete.png" class="block_image" height="24px" width="24px" />
+        </div>
+
         <button id="drawButton">描画</button>
         <button id="eraseButton">消去</button>
         <button id="moveButton">移動</button>
-        <p>色の変更ボタン、色のテクスチャ変更</p>
+        <button id="bucket">塗りつぶし</button>
+        <br>
+        <button id="rot_left">左回転</button>
+        <button id="mirror">左右反転</button>
+        <button id="rot_right">右回転</button>
+        <br>
+        <button id="commandButton">コマンド生成</button>
     </main>
     <script src="editor.js"></script>
 </body>

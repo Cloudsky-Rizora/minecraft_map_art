@@ -34,6 +34,8 @@ document.getElementById("drawButton").addEventListener("click", () => mode = "dr
 document.getElementById("eraseButton").addEventListener("click", () => mode = "erase");
 document.getElementById("moveButton").addEventListener("click", () => mode = "move");
 document.getElementById("bucket").addEventListener("click", () => mode = "bucket");
+document.getElementById("dropper").addEventListener("click", () => mode = "dropper");
+
 
 //マイクラのブロック,色,画像リストをjsonから引っ張ってくる関数
 async function loadMinecraftBlocks() {
@@ -221,8 +223,56 @@ function rot_right(array) {
     return a;
 }
 
-//圧縮されたブロックの配置listをマイクラのコマンドに書き換える関数(xz面,原点左下)
-function toCommand(array, X = 0, Y = 64, Z = 0) {
+//圧縮されたブロックの配置listをマイクラのコマンドに書き換える関数(原点画像の左下)
+function toCommandxy(array, X = 0, Y = 64, Z = 0) {
+    let command_list = [];
+    let compressed_list = [];
+    // 圧縮処理
+    for (let y = array.length-1; y >= 0; y--) {
+        compressed_list.push(compressArray(array[y]));
+    }
+
+    for (let y = compressed_list.length-1; y >= 0; y--) {
+        let start = 0;
+        let end = 0;
+
+        for (let z = 0; z < compressed_list[y].length; z += 2) {
+            let block_name = compressed_list[y][z];
+            let block_len = compressed_list[y][z+1];
+
+            end = start + block_len - 1;
+            command_list.push(`fill ${start + X} ${y + Y} ${Z} ${end + X} ${y + Y} ${Z} minecraft:${block_name.replace(/\.png$/, "")}`);
+
+            start += block_len;
+        }
+    }
+    return command_list;
+}
+function toCommandyz(array, X = 0, Y = 64, Z = 0) {
+    let command_list = [];
+    let compressed_list = [];
+    // 圧縮処理
+    for (let y = array.length-1; y >= 0; y--) {
+        compressed_list.push(compressArray(array[y]));
+    }
+
+    for (let y = compressed_list.length-1; y >= 0; y--) {
+        let start = 0;
+        let end = 0;
+
+        for (let z = 0; z < compressed_list[y].length; z += 2) {
+            let block_name = compressed_list[y][z];
+            let block_len = compressed_list[y][z+1];
+
+            end = start + block_len - 1;
+            command_list.push(`fill ${X} ${y + Y} ${start + Z} ${X} ${y + Y} ${end + Z} minecraft:${block_name.replace(/\.png$/, "")}`);
+
+            start += block_len;
+        }
+    }
+    return command_list;
+}
+function toCommandzx(array, X = 0, Y = 64, Z = 0) {
     let command_list = [];
     let compressed_list = [];
     // 圧縮処理
@@ -246,6 +296,7 @@ function toCommand(array, X = 0, Y = 64, Z = 0) {
     }
     return command_list;
 }
+
 //command.txtダウンロード関数
 async function saveCommandsToFile(command_list) {
     const zip = new JSZip();
@@ -334,6 +385,9 @@ canvas.addEventListener("mousedown", (event) => {
         action_list.push(block_name);
         replaceConnectedBlocks(event);
     }
+    else if (mode === "dropper") {
+        spoit(event);
+    }
 });
 
 // マウスアップイベント
@@ -343,7 +397,7 @@ canvas.addEventListener("mouseup", () => {
         all_action_list.push(action_list);
         action_list = [];
         index++;
-        console.log(all_action_list);
+        //console.log(all_action_list);
     }
 });
 
@@ -417,7 +471,6 @@ const directions = [
     { dx: 1, dy: 0 }, { dx: -1, dy: 0 },
     { dx: 0, dy: 1 }, { dx: 0, dy: -1 }
 ];
-
 function replaceConnectedBlocks(event) {
     const x = Math.floor((event.offsetX - imgX) / scale / blockSize);
     const y = Math.floor((event.offsetY - imgY) / scale / blockSize);
@@ -455,6 +508,37 @@ function replaceConnectedBlocks(event) {
         }
         do_count = 0;
         display();
+    }
+}
+
+//スポイト関数
+function spoit(event){
+    const x = Math.floor((event.offsetX-imgX)/scale/blockSize);
+    const y = Math.floor((event.offsetY-imgY)/scale/blockSize);
+    if (0 <= x && x < tmpCanvas.width/blockSize && 0 <= y && y < tmpCanvas.height/blockSize){
+        const spoit_block = block_name_list[y][x];
+    
+        // すべての画像の glow を削除
+        document.querySelectorAll(".block_image").forEach(img => {
+            img.classList.remove("glow");
+        });
+        html_elements = document.querySelector(`img[src="block_img/${spoit_block}"]`);
+        // クリックされた画像だけに glow を追加
+        html_elements.classList.add("glow");
+    
+        block_name = spoit_block;
+        block_number = getBlockNumberByName(block_name);
+    }
+    else{
+        const spoit_block = "air.png";
+    
+        // すべての画像の glow を削除
+        document.querySelectorAll(".block_image").forEach(img => {
+            img.classList.remove("glow");
+        });
+        
+        block_name = spoit_block;
+        block_number = getBlockNumberByName(block_name);
     }
 }
 
@@ -632,6 +716,72 @@ document.getElementById("redo").addEventListener("click",function(){
     console.log("do_count",do_count,"index",index);
 });
 
+//どのラジオボタンが押されたかでドット画像を出力する平面を決定する処理
+const radios = document.querySelectorAll('input[name="axis"]');
+
+// 各ラジオボタンにイベントリスナーを設定
+radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+    const selected = document.querySelector('input[name="axis"]:checked');
+    console.log("選択された軸:", selected.value);
+    if (selected) {
+        console.log("選択された軸:", selected.value);
+    }
+    });
+});
+
+// ページ読み込み時にすでに選択されているものがあれば表示
+const selected = document.querySelector('input[name="axis"]:checked');
+window.addEventListener('DOMContentLoaded', () => {
+    if (selected) {
+    console.log("初期選択:", selected.value);
+    }
+});
+
+//変換後のドット画像つきポップアップの表示
+const popCanvas = document.getElementById("popupCanvas")
+const popCtx = popCanvas.getContext("2d");
+popCanvas.width = img_width*16;
+popCanvas.height = Math.round(img_width*aspect_rate)*16;
+
+//popCanvasの表示width,表示heightを設定
+const popup_content = document.getElementsByClassName('popup-content');
+if (popCanvas.width > popCanvas.height) {
+    // 横長
+    const canvasWidth = 55; // vw
+    const canvasHeight = 55 * aspect_rate; // vw
+    
+    popCanvas.style.width = `${canvasWidth}vw`;
+    popCanvas.style.height = `${canvasHeight}vw`;
+    
+    popup_content[0].style.width = `${canvasWidth}vw`;
+    popup_content[0].style.height = `calc(${canvasHeight}vw + 200px)`;
+    
+} else {
+    // 縦長
+    const canvasHeight = 65; // vh
+    const canvasWidth = 65 / aspect_rate; // vh
+
+    popCanvas.style.width = `${canvasWidth}vh`;
+    popCanvas.style.height = `${canvasHeight}vh`;
+
+    popup_content[0].style.width = `${canvasWidth}vh`;
+    popup_content[0].style.height = `calc(${canvasHeight}vh + 200px)`;
+}
+document.getElementById('command_popup').style.display = 'none';
+function openPopup() {
+    document.getElementById('command_popup').style.display = 'flex';
+    popCtx.drawImage(tmpCanvas, 0,0, tmpCanvas.width, tmpCanvas.height);
+}
+function closePopup() {
+    document.getElementById('command_popup').style.display = 'none';
+}
+function outsideClick(event) {
+    if (event.target.id === 'command_popup') {
+        closePopup();
+    }
+}
+
 //コマンド生成ボタンが押されたときにコマンドを生成する関数
 let x = 0;
 let y = 64;
@@ -641,6 +791,14 @@ document.getElementById("commandButton").addEventListener("click",function(){
     x = Number(document.getElementById('x').value);
     y = Number(document.getElementById('y').value);
     z = Number(document.getElementById('z').value);
-    command_list = toCommand(block_name_list,x,y,z);
+    if (selected.value == undefined || selected.value == 'z-x'){
+        command_list = toCommandzx(block_name_list,x,y,z);
+    }
+    else if(selected.value == 'x-y'){
+        command_list = toCommandxy(block_name_list,x,y,z);
+    }
+    else if(selected.value == 'y-z'){
+        command_list = toCommandyz(block_name_list,x,y,z);
+    }
     saveCommandsToFile(command_list);
 });

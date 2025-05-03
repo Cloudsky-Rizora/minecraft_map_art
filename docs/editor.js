@@ -3,6 +3,40 @@ const compressed_pixel_data = sessionStorage.getItem("compressed_pixel_data");
 const img_width = sessionStorage.getItem('img_width');
 const aspect_rate = sessionStorage.getItem('aspect_rate');
 
+//キャンバスの用意
+const canvas = document.getElementById('dotCanvas')
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+//tmpCanvasの用意
+const tmpCanvas = document.createElement('canvas');
+const tmpCtx = tmpCanvas.getContext("2d");
+tmpCanvas.width = img_width*16;
+tmpCanvas.height = Math.round(img_width*aspect_rate)*16;
+
+//ドット絵関係の初期設定
+//拡大縮小要素
+let scale = 512/tmpCanvas.width;
+const scaleFactor = 1.1;
+const minscale = 0.01, maxscale = 10;
+
+let imgX = 0, imgY = 0; //画像のオフセット
+let mouseX = canvas.width/2,mouseY = canvas.height/2;
+
+//ドット絵のデータ処理＆描画
+//モード切替初期設定
+let mode = "move"; // 初期モード（"move", "erase", "draw"）
+let isDragging = false;
+let lastX, lastY;
+let pixelSize = 16; // ピクセルサイズ（加筆・消去時）
+
+// ボタン押下でmodeの切り替え
+document.getElementById("drawButton").addEventListener("click", () => mode = "draw");
+document.getElementById("eraseButton").addEventListener("click", () => mode = "erase");
+document.getElementById("moveButton").addEventListener("click", () => mode = "move");
+document.getElementById("bucket").addEventListener("click", () => mode = "bucket");
+document.getElementById("dropper").addEventListener("click", () => mode = "dropper");
+
+
 //マイクラのブロック,色,画像リストをjsonから引っ張ってくる関数
 async function loadMinecraftBlocks() {
     const response = await fetch('minecraftBlocks.json');
@@ -41,14 +75,14 @@ function preloadImages(blockList,blockImages) {
 //minecraftBlocksのnameからnumberへ変換する関数
 function getBlockNumberByName(name) {
     const block = minecraftBlocks.find(block => block.name === name);
-    return block ? block.number : 32; // 見つからなかった場合は本棚の値を返す
+    return block ? block.number : 999; // 見つからなかった場合は本棚の値を返す
 }
 
 //minecraftBlocksのnumberからnameへ変換する関数
 function getBlockNameByNumber(number) {
-    //if (!Array.isArray(minecraftBlocks)) return "Bookshelf"; // 配列が未定義の場合の対策
+    //if (!Array.isArray(minecraftBlocks)) return "shelf"; // 配列が未定義の場合の対策
     const block = minecraftBlocks.find(block => block.number === number);
-    return block ? block.name : "Bookshelf.png"; // 見つからなかった場合は本棚を返す
+    return block ? block.name : "air.png"; // 見つからなかった場合は本棚を返す
 }
 
 // 画像移動処理関数（moveモード用）
@@ -79,6 +113,7 @@ function display() {
     // 一時キャンバスをメインキャンバスに描画（スケール・トランスレート適用）
     ctx.drawImage(tmpCanvas, 0,0, tmpCanvas.width, tmpCanvas.height);
     ctx.restore();
+    //console.log('draw complete')
 }
 
 //tmpcanvasにブロックでドット化した画像を写す関数
@@ -168,7 +203,7 @@ function rot_left(array) {
     return a;
 }
 
-//二次元配列を左右反転させる関数
+//2次元配列を左右反転させる関数
 function mirror(array) {
     return array.map(row => row.reverse());
 }
@@ -188,8 +223,56 @@ function rot_right(array) {
     return a;
 }
 
-//圧縮されたブロックの配置listをマイクラのコマンドに書き換える関数(xz面,原点左下)
-function toCommand(array, X = 0, Y = 64, Z = 0) {
+//圧縮されたブロックの配置listをマイクラのコマンドに書き換える関数(原点画像の左下)
+function toCommandxy(array, X = 0, Y = 64, Z = 0) {
+    let command_list = [];
+    let compressed_list = [];
+    // 圧縮処理
+    for (let y = array.length-1; y >= 0; y--) {
+        compressed_list.push(compressArray(array[y]));
+    }
+
+    for (let y = compressed_list.length-1; y >= 0; y--) {
+        let start = 0;
+        let end = 0;
+
+        for (let z = 0; z < compressed_list[y].length; z += 2) {
+            let block_name = compressed_list[y][z];
+            let block_len = compressed_list[y][z+1];
+
+            end = start + block_len - 1;
+            command_list.push(`fill ${start + X} ${y + Y} ${Z} ${end + X} ${y + Y} ${Z} minecraft:${block_name.replace(/\.png$/, "")}`);
+
+            start += block_len;
+        }
+    }
+    return command_list;
+}
+function toCommandyz(array, X = 0, Y = 64, Z = 0) {
+    let command_list = [];
+    let compressed_list = [];
+    // 圧縮処理
+    for (let y = array.length-1; y >= 0; y--) {
+        compressed_list.push(compressArray(array[y]));
+    }
+
+    for (let y = compressed_list.length-1; y >= 0; y--) {
+        let start = 0;
+        let end = 0;
+
+        for (let z = 0; z < compressed_list[y].length; z += 2) {
+            let block_name = compressed_list[y][z];
+            let block_len = compressed_list[y][z+1];
+
+            end = start + block_len - 1;
+            command_list.push(`fill ${X} ${y + Y} ${start + Z} ${X} ${y + Y} ${end + Z} minecraft:${block_name.replace(/\.png$/, "")}`);
+
+            start += block_len;
+        }
+    }
+    return command_list;
+}
+function toCommandzx(array, X = 0, Y = 64, Z = 0) {
     let command_list = [];
     let compressed_list = [];
     // 圧縮処理
@@ -213,6 +296,7 @@ function toCommand(array, X = 0, Y = 64, Z = 0) {
     }
     return command_list;
 }
+
 //command.txtダウンロード関数
 async function saveCommandsToFile(command_list) {
     const zip = new JSZip();
@@ -249,85 +333,212 @@ async function saveCommandsToFile(command_list) {
     URL.revokeObjectURL(url); // メモリ解放
 }
 
+//Undo関数
+function Undo(){
+    if (!all_action_list[index]) return;
+    for (let i = 1; i < all_action_list[index].length; i += 3){
+        let block_number = all_action_list[index][i];
+        let x = all_action_list[index][i+1];
+        let y = all_action_list[index][i+2];
+        let block_name = getBlockNameByNumber(block_number);
 
-//キャンバスの用意
-const canvas = document.getElementById('dotCanvas')
-const ctx = canvas.getContext("2d");
-ctx.imageSmoothingEnabled = false;
-//tmpCanvasの用意
-const tmpCanvas = document.createElement('canvas');
-const tmpCtx = tmpCanvas.getContext("2d");
-tmpCanvas.width = img_width*16;
-tmpCanvas.height = Math.round(img_width*aspect_rate)*16;
+        img2 = blockImages[block_number];
+        tmpCtx.drawImage(img2, x * blockSize, y * blockSize, blockSize, blockSize);
+        block_name_list[y][x] = block_name;
+    };
+    display();
+}
 
-//ドット絵関係の初期設定
-//拡大縮小要素
-let scale = 512/tmpCanvas.width;
-const scaleFactor = 1.1;
-const minscale = 0.01, maxscale = 10;
+//Redo関数
+function Redo(){
+    if (!all_action_list[index]) return;
+    for (let i = 1; i < all_action_list[index].length; i += 3){
+        let block_number = getBlockNumberByName(all_action_list[index][0]);
+        let block_name = all_action_list[index][0];
+        let x = all_action_list[index][i+1];
+        let y = all_action_list[index][i+2];
 
-let imgX = 0, imgY = 0; //画像のオフセット
-let mouseX = canvas.width/2,mouseY = canvas.height/2;
-
-//ドット絵のデータ処理＆描画
-//モード切替初期設定
-let mode = "move"; // 初期モード（"move", "erase", "draw"）
-let isDragging = false;
-let lastX, lastY;
-let pixelSize = 16; // ピクセルサイズ（加筆・消去時）
-
-// ボタン押下でmodeの切り替え
-document.getElementById("drawButton").addEventListener("click", () => mode = "draw");
-document.getElementById("eraseButton").addEventListener("click", () => mode = "erase");
-document.getElementById("moveButton").addEventListener("click", () => mode = "move");
+        img2 = blockImages[block_number];
+        tmpCtx.drawImage(img2, x * blockSize, y * blockSize, blockSize, blockSize);
+        block_name_list[y][x] = block_name;
+    };
+    display();
+}
 
 // マウスダウンイベント（各モードで処理を分ける）
+let all_action_list = [];
+let action_list = [];
 canvas.addEventListener("mousedown", (event) => {
   	if (mode === "move") {
 		startDragging(event);
-  }
+        dragImage(event);
+    }
+    else if (mode === "draw") {
+        action_list.push(block_name);
+        drawOrErase(event);
+    }
+    else if (mode === "erase") {
+        action_list.push("air.png");
+        drawOrErase(event);
+    }
+    else if (mode === "bucket") {
+        action_list.push(block_name);
+        replaceConnectedBlocks(event);
+    }
+    else if (mode === "dropper") {
+        spoit(event);
+    }
 });
+
+// マウスアップイベント
+canvas.addEventListener("mouseup", () => {
+    isDragging = false;
+    if (action_list.length>0) {
+        all_action_list.push(action_list);
+        action_list = [];
+        index++;
+        //console.log(all_action_list);
+    }
+});
+
 // マウスムーブイベント（各モードで処理を分ける）
 canvas.addEventListener("mousemove", (event) => {
 	if (mode === "move" && isDragging) {
 		dragImage(event);
-	} else if ((mode === "erase" || mode === "draw") && event.buttons === 1) {
+	}
+    else if ((mode === "erase" || mode === "draw") && event.buttons === 1) {
 		drawOrErase(event);
 	}
 });
-//移動or描画
-canvas.addEventListener("click", (event) => {
-	if (mode === "move" && isDragging) {
-		dragImage(event);
-	} else if (mode === "erase" || mode === "draw") {
-        drawOrErase(event);
-	}
-});
-// マウスアップ・マウスリーブイベント
-canvas.addEventListener("mouseup", () => isDragging = false);
+
+//マウスリーブイベント(カーソルが要素外へ出たとき)
 canvas.addEventListener("mouseleave", () => isDragging = false);
 
 
 //編集・消去処理（draw / erase モード用）
 blockSize = 16;
+let tmpx = -1;
+let tmpy = -1;
+let index = 0;
 function drawOrErase(event) {
-    const x = Math.floor((event.offsetX-imgX)/scale/16);
-    const y = Math.floor((event.offsetY-imgY)/scale/16);
-    if (0 <= x && x < tmpCanvas.width/16 && 0 <= y && y < tmpCanvas.height/16){
-        if (mode === "erase") {
-            //airの画像をクリックした座標に置く(tmpctxの書き換え)(保存も)
-            img2 = blockImages[999];
-            tmpCtx.drawImage(img2, x * blockSize, y * blockSize, blockSize, blockSize);
-            block_name_list[y][x] = "bookshelf.png";
-            display();
-        } 
-        else if (mode === "draw") {
-            //選択しているブロックの画像をくりっくした座標に置く(tmpctxの置き換え)
+    const x = Math.floor((event.offsetX-imgX)/scale/blockSize);
+    const y = Math.floor((event.offsetY-imgY)/scale/blockSize);
+    //画像内なら描画
+    if (0 <= x && x < tmpCanvas.width/blockSize && 0 <= y && y < tmpCanvas.height/blockSize){
+        //
+        if (tmpx != x || tmpy != y){
+            if (mode === "erase") {
+                if (block_name_list[y][x] != "air.png"){
+                    //airの画像をクリックした座標に置く(tmpctxの書き換え)(保存も)
+                    img2 = blockImages[999];
+                    tmpCtx.drawImage(img2, x * blockSize, y * blockSize, blockSize, blockSize);
+                    
+                    all_action_list.splice(index);
+                    action_list.push(getBlockNumberByName(block_name_list[y][x]),x,y); //元のブロック,書き換え後のブロック,座標を保存
+
+                    block_name_list[y][x] = "air.png";
+                    
+                    do_count = 0;
+                    
+                    display();
+                }
+            } 
+            else if (mode === "draw") {
+                if (block_name_list[y][x] !== block_name) {
+                    img2 = blockImages[block_number];
+                    // img2がundefinedなら処理しない
+                    if (!img2) return;         
+                    tmpCtx.drawImage(img2, x * blockSize, y * blockSize, blockSize, blockSize);
+            
+                    all_action_list.splice(index);
+                    action_list.push(getBlockNumberByName(block_name_list[y][x]), x, y);
+            
+                    block_name_list[y][x] = block_name;
+            
+                    do_count = 0;
+
+                    display();
+                }
+            }
+            tmpx = x;
+            tmpy = y;
+        };
+    }
+}
+
+//バケツ関数
+const directions = [
+    { dx: 1, dy: 0 }, { dx: -1, dy: 0 },
+    { dx: 0, dy: 1 }, { dx: 0, dy: -1 }
+];
+function replaceConnectedBlocks(event) {
+    const x = Math.floor((event.offsetX - imgX) / scale / blockSize);
+    const y = Math.floor((event.offsetY - imgY) / scale / blockSize);
+    
+    if (x < 0 || x >= tmpCanvas.width / blockSize || y < 0 || y >= tmpCanvas.height / blockSize) {
+        return;
+    }
+    
+    const targetBlock = block_name_list[y][x];
+    if (!targetBlock) return;
+
+    if (block_name_list[y][x] !== block_name) {
+        const queue = [{ x, y }];
+        const visited = new Set();
+        visited.add(`${x},${y}`);
+        
+        all_action_list.splice(index);
+
+        while (queue.length > 0) {
+            const { x, y } = queue.shift();
             img2 = blockImages[block_number];
             tmpCtx.drawImage(img2, x * blockSize, y * blockSize, blockSize, blockSize);
+            action_list.push(getBlockNumberByName(block_name_list[y][x]),x,y); //元のブロック,書き換え後のブロック,座標を保存
             block_name_list[y][x] = block_name;
-            display();
+            for (const { dx, dy } of directions) {
+                const nx = x + dx;
+                const ny = y + dy;
+                if (nx >= 0 && nx < tmpCanvas.width / blockSize && ny >= 0 && ny < tmpCanvas.height / blockSize) {
+                    if (!visited.has(`${nx},${ny}`) && block_name_list[ny][nx] === targetBlock) {
+                        queue.push({ x: nx, y: ny });
+                        visited.add(`${nx},${ny}`);
+                    }
+                }
+            }
         }
+        do_count = 0;
+        display();
+    }
+}
+
+//スポイト関数
+function spoit(event){
+    const x = Math.floor((event.offsetX-imgX)/scale/blockSize);
+    const y = Math.floor((event.offsetY-imgY)/scale/blockSize);
+    if (0 <= x && x < tmpCanvas.width/blockSize && 0 <= y && y < tmpCanvas.height/blockSize){
+        const spoit_block = block_name_list[y][x];
+    
+        // すべての画像の glow を削除
+        document.querySelectorAll(".block_image").forEach(img => {
+            img.classList.remove("glow");
+        });
+        html_elements = document.querySelector(`img[src="block_img/${spoit_block}"]`);
+        // クリックされた画像だけに glow を追加
+        html_elements.classList.add("glow");
+    
+        block_name = spoit_block;
+        block_number = getBlockNumberByName(block_name);
+    }
+    else{
+        const spoit_block = "air.png";
+    
+        // すべての画像の glow を削除
+        document.querySelectorAll(".block_image").forEach(img => {
+            img.classList.remove("glow");
+        });
+        
+        block_name = spoit_block;
+        block_number = getBlockNumberByName(block_name);
     }
 }
 
@@ -384,35 +595,210 @@ function limitImagePosition() {
 }
 
 //ブロックボタンを押したときに押されたブロックを反映する関数
+let block_name;
+let block_number;
 document.querySelectorAll(".block_image").forEach(image => {
     image.addEventListener("click", function() {
+        // すでに光っている場合は glow を削除して終了
+        if (this.classList.contains("glow")) {
+            this.classList.remove("glow");
+            return;
+        }
+
+        // すべての画像の glow を削除
+        document.querySelectorAll(".block_image").forEach(img => {
+            img.classList.remove("glow");
+        });
+
+        // クリックされた画像だけに glow を追加
+        this.classList.add("glow");
+
         block_name = this.getAttribute("src").slice(10);
         block_number = getBlockNumberByName(block_name);
+    });
+});
+
+//編集系のボタンが押されたときにon,offを切り替える関数
+document.querySelectorAll(".edit").forEach(button => {
+    button.addEventListener("click", function() {
+        // すべてのボタンの "active" クラスを削除
+        document.querySelectorAll(".edit").forEach(btn => {
+            btn.classList.remove("active");
+        });
+
+        // クリックされたボタンだけ "active" クラスを追加
+        this.classList.add("active");
     });
 });
 
 //左回転ボタンが押されたときにblock_name_listとプレビューを回転させる関数
 document.getElementById("rot_left").addEventListener("click",function(){
     block_name_list = rot_left(block_name_list);
+    all_action_list.splice(index);
+    all_action_list.push("rot_left");
     renderCanvas2(block_name_list);
+    index ++;
+    do_count = 0;
+    console.log(all_action_list);
 });
 
 //左右反転ボタンが押されたときにblock_name_listとプレビューを左右反転させる関数
 document.getElementById("mirror").addEventListener("click",function(){
     block_name_list = mirror(block_name_list);
+    all_action_list.splice(index);
+    all_action_list.push("mirror");
     renderCanvas3(block_name_list);
+    index ++;
+    do_count = 0;
+    console.log(all_action_list);
 });
 
 //右回転ボタンが押されたときにblock_name_listとプレビューを回転させる関数
 document.getElementById("rot_right").addEventListener("click",function(){
     block_name_list = rot_right(block_name_list);
+    all_action_list.splice(index);
+    all_action_list.push("rot_right");
     renderCanvas2(block_name_list);
+    index ++;
+    do_count = 0;
+    console.log(all_action_list);
 });
 
+//undoボタンが押されたときにundoする関数
+let do_count = 0;
+document.getElementById("undo").addEventListener("click",function(){
+    if (do_count < all_action_list.length){
+        do_count += 1;
+        index = all_action_list.length - do_count;
+        action = all_action_list[index]
+        
+        if (action == "rot_right"){
+            block_name_list = rot_left(block_name_list);
+            renderCanvas2(block_name_list);
+        }
+        else if (action == "rot_left"){
+            block_name_list = rot_right(block_name_list);
+            renderCanvas2(block_name_list);
+        }
+        else if (action == "mirror"){
+            block_name_list = mirror(block_name_list);
+            renderCanvas3(block_name_list);
+        }
+        else if (Array.isArray(action) == true){
+            Undo();
+        }
+    }
+    console.log("do_count",do_count,"index",index);
+});
+//redoボタンが押されたときにredoする関数
+document.getElementById("redo").addEventListener("click",function(){
+    if (do_count > 0) {
+        do_count -= 1;
+        action = all_action_list[index]
+        if (action == "rot_right"){
+            block_name_list = rot_right(block_name_list);
+            renderCanvas2(block_name_list);
+        }
+        else if (action == "rot_left"){
+            block_name_list = rot_left(block_name_list);
+            renderCanvas2(block_name_list);
+        }
+        else if (action == "mirror"){
+            block_name_list = mirror(block_name_list);
+            renderCanvas3(block_name_list);
+        }
+        else {
+            Redo();
+        }
+
+        if (do_count >= 0) index ++;
+    }
+    console.log("do_count",do_count,"index",index);
+});
+
+//どのラジオボタンが押されたかでドット画像を出力する平面を決定する処理
+const radios = document.querySelectorAll('input[name="axis"]');
+
+// 各ラジオボタンにイベントリスナーを設定
+radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+    const selected = document.querySelector('input[name="axis"]:checked');
+    console.log("選択された軸:", selected.value);
+    if (selected) {
+        console.log("選択された軸:", selected.value);
+    }
+    });
+});
+
+// ページ読み込み時にすでに選択されているものがあれば表示
+const selected = document.querySelector('input[name="axis"]:checked');
+window.addEventListener('DOMContentLoaded', () => {
+    if (selected) {
+    console.log("初期選択:", selected.value);
+    }
+});
+
+//変換後のドット画像つきポップアップの表示
+const popCanvas = document.getElementById("popupCanvas")
+const popCtx = popCanvas.getContext("2d");
+popCanvas.width = img_width*16;
+popCanvas.height = Math.round(img_width*aspect_rate)*16;
+
+//popCanvasの表示width,表示heightを設定
+const popup_content = document.getElementsByClassName('popup-content');
+if (popCanvas.width > popCanvas.height) {
+    // 横長
+    const canvasWidth = 55; // vw
+    const canvasHeight = 55 * aspect_rate; // vw
+    
+    popCanvas.style.width = `${canvasWidth}vw`;
+    popCanvas.style.height = `${canvasHeight}vw`;
+    
+    popup_content[0].style.width = `${canvasWidth}vw`;
+    popup_content[0].style.height = `calc(${canvasHeight}vw + 200px)`;
+    
+} else {
+    // 縦長
+    const canvasHeight = 65; // vh
+    const canvasWidth = 65 / aspect_rate; // vh
+
+    popCanvas.style.width = `${canvasWidth}vh`;
+    popCanvas.style.height = `${canvasHeight}vh`;
+
+    popup_content[0].style.width = `${canvasWidth}vh`;
+    popup_content[0].style.height = `calc(${canvasHeight}vh + 200px)`;
+}
+document.getElementById('command_popup').style.display = 'none';
+function openPopup() {
+    document.getElementById('command_popup').style.display = 'flex';
+    popCtx.drawImage(tmpCanvas, 0,0, tmpCanvas.width, tmpCanvas.height);
+}
+function closePopup() {
+    document.getElementById('command_popup').style.display = 'none';
+}
+function outsideClick(event) {
+    if (event.target.id === 'command_popup') {
+        closePopup();
+    }
+}
+
 //コマンド生成ボタンが押されたときにコマンドを生成する関数
+let x = 0;
+let y = 64;
+let z = 0;
+
 document.getElementById("commandButton").addEventListener("click",function(){
-    // let block_num_list = block_name_list.flat().map(name => getBlockNumberByName(name));
-    // let compressed_edit_data = compressArray(block_num_list).join(',');
-    command_list = toCommand(block_name_list,-64,-2,192);
+    x = Number(document.getElementById('x').value);
+    y = Number(document.getElementById('y').value);
+    z = Number(document.getElementById('z').value);
+    if (selected.value == undefined || selected.value == 'z-x'){
+        command_list = toCommandzx(block_name_list,x,y,z);
+    }
+    else if(selected.value == 'x-y'){
+        command_list = toCommandxy(block_name_list,x,y,z);
+    }
+    else if(selected.value == 'y-z'){
+        command_list = toCommandyz(block_name_list,x,y,z);
+    }
     saveCommandsToFile(command_list);
 });

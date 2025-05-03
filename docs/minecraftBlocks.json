@@ -58,6 +58,7 @@
     { "name": "amethyst_block.png", "color": [100,71,158], "number":53},
     { "name": "purpur_block.png", "color": [199,168,199], "number":54},
 
-    { "name": "bookshelf.png", "color": [999,999,999], "number":999}
+    { "name": "air.png", "color": [999,999,999], "number":999}
+
 
 ]

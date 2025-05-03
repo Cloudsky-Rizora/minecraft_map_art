@@ -3,26 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="index.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>マップアート生成(試作中)</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>Minecraft ドット画像生成ツール</title>
 </head>
 
 <body>
     <header>
-        <h1>マップアート生成</h1>
+        <div class="site-title">マイクラマップアート生成</div>
+        <div class="header-links">
+          <a href="help.html">ヘルプ</a>
+        </div>
     </header>
     
     <main>
         <div class="bg_pattern"></div><!--背景-->
-
-        <canvas id="canvas" width="300vw" height="300vw"></canvas> <!-- このCanvasは提出画像表示のために使う -->
+        <br>
+        <canvas class="Canvas" id="canvas" width="300px" height="300px"></canvas> <!-- このCanvasは提出画像表示のために使う -->
         <br>
         <input type="file" id="uploaded_image" accept="image/*">
         <br>
-        <div class="wool">
-            <input type="checkbox" id="woolCheckbox" checked>
+        <br>
+        <div class="blockButton" id="wool">
+            <input type="checkbox" class="checkbox" id="woolCheckbox" checked>
             
             <img src="block_img/black_wool.png" class="block_image glow" height="24px" width="24px" />
             <img src="block_img/blue_wool.png" class="block_image glow" height="24px" width="24px" />
@@ -42,8 +47,8 @@
             <img src="block_img/yellow_wool.png" class="block_image glow" height="24px" width="24px" />
         </div>
         
-        <div class="concrete">
-            <input type="checkbox" id="concreteCheckbox" checked>
+        <div class="blockButton" id="concrete">
+            <input type="checkbox" class="checkbox" id="concreteCheckbox" checked>
 
             <img src="block_img/black_concrete.png" class="block_image glow" height="24px" width="24px" />
             <img src="block_img/blue_concrete.png" class="block_image glow" height="24px" width="24px" />
@@ -63,8 +68,8 @@
             <img src="block_img/yellow_concrete.png" class="block_image glow" height="24px" width="24px" />
         </div>
 
-        <div class="planks">
-            <input type="checkbox" id="planksCheckbox" checked>
+        <div class="blockButton" id="planks">
+            <input type="checkbox" class="checkbox" id="planksCheckbox" checked>
 
             <img src="block_img/acacia_planks.png" class="block_image glow" height="24px" width="24px" />
             <img src="block_img/bamboo_planks.png" class="block_image glow" height="24px" width="24px" />
@@ -80,8 +85,8 @@
             <img src="block_img/warped_planks.png" class="block_image glow" height="24px" width="24px" />
         </div>
 
-        <div class="ore">
-            <input type="checkbox" id="planksCheckbox" checked>
+        <div class="blockButton" id="ore">
+            <input type="checkbox" class="checkbox" id="planksCheckbox" checked>
 
             <img src="block_img/coal_block.png" class="block_image glow" height="24px" width="24px" />
             <img src="block_img/iron_block.png" class="block_image glow" height="24px" width="24px" />
@@ -97,25 +102,24 @@
         </div>
 
         <div class="container"><!--数字箱-->
-            <p>画像の横幅
-            <input type="number" id="numberInput" placeholder="画像の横幅" step="1" value="128">
+            <p>横幅のブロック数
+            <input type="number" class="numberbox" id="numberInput" placeholder="画像の横幅" step="1" value="128">
             </p>
             
             <button id="submitButton" onclick="openPopup()">ドットに変換</button>
             <div class="popup-overlay" id="popup" onclick="outsideClick(event)">
                 <div class="popup-content">
-                    <canvas id="dotCanvas" style="image-rendering: pixelated;"></canvas> <!-- ドット絵をプレビュー表示するCanvas -->
+                    <canvas class="Canvas" id="dotCanvas" style="image-rendering: pixelated;"></canvas> <!-- ドット絵をプレビュー表示するCanvas -->
                     <br>
-                    <button class="edit-btn"id="editButton" onclick="location.href='editor.html'">編集</button>
+                    <button class="edit-btn" id="editButton" onclick="location.href='editor.html'">編集</button>
                     <button class="close-btn" onclick="closePopup()">閉じる</button>
                 </div>
             </div>
             <p id="result"></p>
-            <p id="test"></p>
         </div>
     
     </main>
-    <script src="script.js"></script>
+    <script src="index.js"></script>
 </body>
 
 </html>

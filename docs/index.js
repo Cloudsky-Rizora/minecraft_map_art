@@ -147,7 +147,6 @@ document.getElementById('uploaded_image').addEventListener('change', function(ev
 //ページを戻ってきたときにファイルの選択を解除する
 window.addEventListener('pageshow', function () {
     document.getElementById('uploaded_image').value = ''; // 選択解除
-    console.log('page back');
 });
 
 //数字取得＆dot画像に変換 横幅が大きいと表示されないバグ

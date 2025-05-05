@@ -75,7 +75,15 @@ canvas {
     align-items: center;      /* 縦方向中央 */
 }
 
+@media (max-width: 860px) {
+    .editor{
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
 .editButton,
+.funcButton,
 .turnButton,
 .actionButton,
 .popupButton{
@@ -83,6 +91,19 @@ canvas {
     justify-content: center;  /* 横方向中央 */
     align-items: center;      /* 縦方向中央 */
 }
+
+.turn:active {
+    transform: scale(0.96);
+}
+
+.action:active {
+    transform: scale(0.96);
+}
+
+.popupbutton:active {
+    transform: scale(0.96);
+}
+
 
 .blockButton {
     display: flex;

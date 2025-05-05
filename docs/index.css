@@ -13,7 +13,42 @@ canvas {
     border: 1px solid #000000;
 }
 
+p{
+    color: white;
+}
+
+.toDot{
+    background-color: white;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* 影 */
+    transition: background-color 0.3s ease, transform 0.1s ease
+}
+
+.canvasbox{
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* 影 */
+    transition: background-color 0.3s ease, transform 0.1s ease;
+  }
+
+.toDot:active{
+    transform: scale(0.96);      /* クリック時に少し縮む */
+}
+
+.canvasbox:active {
+    transform: scale(0.96);
+}
+
 .numberbox {
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
     width: 50px;
     text-align: center;
 }

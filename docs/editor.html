@@ -15,7 +15,7 @@
 <header>
     <div class="site-title">編集ページ</div>
     <div class="header-links">
-      <a href="help.html">ヘルプ</a>
+        <a href="help.html" target="_blank">ヘルプ</a>
     </div>
 </header>
 
@@ -96,9 +96,12 @@
                     <button class="edit" id="moveButton">移動</button>
                     <button class="edit" id="drawButton">描画</button>
                     <button class="edit" id="eraseButton">消去</button>
+                </div>    
+
+                <div class="funcButton">
                     <button class="edit" id="bucket">塗りつぶし</button>
                     <button class="edit" id="dropper">スポイト</button>
-                </div>    
+                </div>
 
                 <div class="turnButton">
                     <button class="turn" id="rot_left">左回転</button>
@@ -112,7 +115,7 @@
                 </div>
 
                 <div class="popupButton">
-                    <button class="popupbutton" id="command_button" onclick="openPopup()">編集完了</button>
+                    <button class="popupbutton" id="command_button" onclick="openPopup()">コマンド生成</button>
                 </div>
             </div>
 

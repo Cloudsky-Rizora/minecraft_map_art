@@ -304,7 +304,7 @@ async function saveCommandsToFile(command_list) {
     // フォルダを作成（階層構造）
     const dot = zip.folder("dot");
     const data = dot.folder("data");
-    const dot_command_function = data.folder("dot_command_functions");
+    const dot_command_function = data.folder("dot_command");
     const functions = dot_command_function.folder("function");
     const jsonData = {
         "pack": {
@@ -639,7 +639,7 @@ document.getElementById("rot_left").addEventListener("click",function(){
     renderCanvas2(block_name_list);
     index ++;
     do_count = 0;
-    console.log(all_action_list);
+    //console.log(all_action_list);
 });
 
 //左右反転ボタンが押されたときにblock_name_listとプレビューを左右反転させる関数
@@ -650,7 +650,7 @@ document.getElementById("mirror").addEventListener("click",function(){
     renderCanvas3(block_name_list);
     index ++;
     do_count = 0;
-    console.log(all_action_list);
+    //console.log(all_action_list);
 });
 
 //右回転ボタンが押されたときにblock_name_listとプレビューを回転させる関数
@@ -661,7 +661,7 @@ document.getElementById("rot_right").addEventListener("click",function(){
     renderCanvas2(block_name_list);
     index ++;
     do_count = 0;
-    console.log(all_action_list);
+    //console.log(all_action_list);
 });
 
 //undoボタンが押されたときにundoする関数
@@ -688,7 +688,7 @@ document.getElementById("undo").addEventListener("click",function(){
             Undo();
         }
     }
-    console.log("do_count",do_count,"index",index);
+    //console.log("do_count",do_count,"index",index);
 });
 //redoボタンが押されたときにredoする関数
 document.getElementById("redo").addEventListener("click",function(){
@@ -713,7 +713,7 @@ document.getElementById("redo").addEventListener("click",function(){
 
         if (do_count >= 0) index ++;
     }
-    console.log("do_count",do_count,"index",index);
+    //console.log("do_count",do_count,"index",index);
 });
 
 //どのラジオボタンが押されたかでドット画像を出力する平面を決定する処理
@@ -723,20 +723,20 @@ const radios = document.querySelectorAll('input[name="axis"]');
 radios.forEach(radio => {
     radio.addEventListener('change', () => {
     const selected = document.querySelector('input[name="axis"]:checked');
-    console.log("選択された軸:", selected.value);
+    //console.log("選択された軸:", selected.value);
     if (selected) {
-        console.log("選択された軸:", selected.value);
+        //console.log("選択された軸:", selected.value);
     }
     });
 });
 
 // ページ読み込み時にすでに選択されているものがあれば表示
-const selected = document.querySelector('input[name="axis"]:checked');
-window.addEventListener('DOMContentLoaded', () => {
-    if (selected) {
-    console.log("初期選択:", selected.value);
-    }
-});
+// const selected = document.querySelector('input[name="axis"]:checked');
+// window.addEventListener('DOMContentLoaded', () => {
+//     if (selected) {
+//     console.log("初期選択:", selected.value);
+//     }
+// });
 
 //変換後のドット画像つきポップアップの表示
 const popCanvas = document.getElementById("popupCanvas")

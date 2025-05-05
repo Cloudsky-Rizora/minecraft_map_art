@@ -8,7 +8,7 @@
 
 ・画像を出力する座標と向きを決めてコマンド生成
 
-・ダウンロードされたファイルの中身(「dot」という名前のファイル)をC:\Users\[username]\AppData\Roaming\.minecraft\saves\\[your_world_name]\datapacksの中に入れる
+・ダウンロードされたファイルの中身(「dot」という名前のファイル)をC:\Users\\[username]\AppData\Roaming\.minecraft\saves\\[your_world_name]\datapacksの中に入れる
 
 ・Minecraftで[your_world_name]の名前のワールドを開き、コマンドで/reloadを実行したのち、/function dot_commandを実行する
 ## できること

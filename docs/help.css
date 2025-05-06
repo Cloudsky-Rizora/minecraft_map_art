@@ -1,0 +1,42 @@
+header {
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+body {
+    /*左右に動かなくする*/
+    padding: 0;
+}
+
+.site-title {
+    font-size: 30px;
+    font-weight: bold;
+}
+.header-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+.header-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+.header-links a:hover {
+    text-decoration: underline;
+}
+
+/*背景*/
+.bg_pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #666;
+    opacity: 1;
+    z-index: -1;
+}

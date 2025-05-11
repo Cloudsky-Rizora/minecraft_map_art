@@ -731,7 +731,7 @@ radios.forEach(radio => {
 });
 
 // ページ読み込み時にすでに選択されているものがあれば表示
-// const selected = document.querySelector('input[name="axis"]:checked');
+const selected = document.querySelector('input[name="axis"]:checked');
 // window.addEventListener('DOMContentLoaded', () => {
 //     if (selected) {
 //     console.log("初期選択:", selected.value);

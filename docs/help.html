@@ -36,20 +36,27 @@
                 <li>編集が終わったらコマンド生成ボタンを押してください。</li>
             </ul>
         
-            <h2>4. マップアートを出力する生成する平面と座標を決める</h2>
+            <h2>4. マップアートを出力する平面と座標を決める</h2>
             <ul>
                 <li>「コマンド生成」ボタンをクリックして、マップアートを生成する平面の設定と座標の設定をします。</li>
                 <li>マップアートを生成する平面を設定します。(z-x面は地面と平行に、x-y面,y-z面は地面と垂直にマップアートを生成します。)</li>
                 <li>マップアートを設置する座標（x, y, z）を指定します。(マップアートが生成される範囲のうち、x,y,zが一番小さい座標を指定してください。)</li>
-                <img src="images/position_plane.png" alt="画像を配置するためのMinecraft内の座標と平面を指定するための設定画面。">
+                <li>画像のように、左下の座標から、正の向きにブロックが配置されます。</li>
+                <div class="set1">
+                    <img src="help_img/毛玉ころね座標設定.png", width="40%", height="40%" alt="画像を配置するためのMinecraft内の座標と平面を指定するための設定画面。">
+                    <img src="help_img/生成座標.png", width="40%", height="40%" alt="Minecraft内でマップアート配置用コマンドを実行している様子。">
+                </div>
+                <div class="set2">
+                    <img src="help_img/毛玉ころね座標設定2.png", width="40%", height="40%" alt="画像を配置するためのMinecraft内の座標と平面を指定するための設定画面。">
+                    <img src="help_img/生成座標2.png", width="40%", height="40%" alt="Minecraft内でマップアート配置用コマンドを実行している様子。">
+                </div>
             </ul>
         
             <h2>5. ダウンロードされたフォルダの中身をMinecraftのフォルダに移動させる</h2>
             <ul>
                 <li>生成されたデータはZIPフォルダとしてダウンロードされます。</li>
-                <li>ZIPフォルダの中の「dot」という名前のフォルダをMinecraftの「datapacks」フォルダに移動させます。</li>
+                <li>ZIPフォルダの中の「dot」という名前のフォルダをMinecraftフォルダの中の「datapacks」フォルダに移動させます。</li>
                 <li>「datapacks」フォルダはデフォルトでは「C:\Users\(ユーザー名)\AppData\Roaming\.minecraft\saves\(ワールド名)\datapacks」という位置にあります。</li>
-                <img src="images/download_folder.png" alt="ダウンロードされたMinecraft用構造ファイルとリソースパックの内容。">
             </ul>
         
             <h2>6. コマンドを実行する</h2>
@@ -57,7 +64,8 @@
                 <li>Minecraft内で 「/reload」 を実行してマップアート生成コマンドを読み込みます。</li>
                 <li> 「/reload」を実行した後、「/function dot_command:command」を実行するとマップアートが生成されます。</li>
                 <li>(ファイルの場所が適正な位置に配置されていれば「/function」を打った時点でコマンドの予測変換に表示されるはずです。)</li>
-                <img src="images/execute_command.png" alt="Minecraft内でマップアート配置用コマンドを実行している様子。">
+                <img src="help_img/予測変換.png", width="50%", height="50%" alt="Minecraft内でマップアート配置用コマンドを実行している様子。">
+
             </ul>
         </div> 
     </main>

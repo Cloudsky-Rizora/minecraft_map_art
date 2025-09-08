@@ -12,3 +12,4 @@
 
 ・Minecraftで[your_world_name]の名前のワールドを開き、コマンドで/reloadを実行したのち、/function dot_commandを実行する
 ## できること
+・自分の好きな画像をMINECRAFT上でドット絵にすることができます！
